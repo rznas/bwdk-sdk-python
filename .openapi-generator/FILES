@@ -6,8 +6,10 @@
 README.md
 bwdk_sdk/__init__.py
 bwdk_sdk/api/__init__.py
-bwdk_sdk/api/api.py
-bwdk_sdk/api/api.py
+bwdk_sdk/api/merchant_orders_api.py
+bwdk_sdk/api/merchant_wallet_api.py
+bwdk_sdk/api/order_shipping_api.py
+bwdk_sdk/api/seller_profile_management_api.py
 bwdk_sdk/api_client.py
 bwdk_sdk/api_response.py
 bwdk_sdk/configuration.py
@@ -46,8 +48,6 @@ bwdk_sdk/models/verify_order.py
 bwdk_sdk/models/wallet_balance.py
 bwdk_sdk/py.typed
 bwdk_sdk/rest.py
-docs/Api.md
-docs/Api.md
 docs/AuthStatusResponse.md
 docs/BusinessAddress.md
 docs/DeliveryTimeRangeDisplay.md
@@ -57,7 +57,9 @@ docs/Merchant.md
 docs/MerchantOrderCancelShipmentResponse.md
 docs/MerchantOrderRefundResponse.md
 docs/MerchantOrderReviveShipmentResponse.md
+docs/MerchantOrdersApi.md
 docs/MerchantPaidOrderList.md
+docs/MerchantWalletApi.md
 docs/NullEnum.md
 docs/Option.md
 docs/OrderCreate.md
@@ -65,6 +67,7 @@ docs/OrderCreateResponse.md
 docs/OrderDetail.md
 docs/OrderError.md
 docs/OrderItemCreate.md
+docs/OrderShippingApi.md
 docs/OrderStatusEnum.md
 docs/OrderUser.md
 docs/Packing.md
@@ -73,6 +76,7 @@ docs/PaginatedOrderDetailList.md
 docs/PaymentOrder.md
 docs/RefundOrder.md
 docs/ReviveShipment.md
+docs/SellerProfileManagementApi.md
 docs/ShippingMethod.md
 docs/ShippingTypeEnum.md
 docs/TypeNameEnum.md
@@ -86,7 +90,6 @@ setup.cfg
 setup.py
 test-requirements.txt
 test/__init__.py
-test/test_api.py
 test/test_auth_status_response.py
 test/test_business_address.py
 test/test_delivery_time_range_display.py
@@ -96,7 +99,9 @@ test/test_merchant.py
 test/test_merchant_order_cancel_shipment_response.py
 test/test_merchant_order_refund_response.py
 test/test_merchant_order_revive_shipment_response.py
+test/test_merchant_orders_api.py
 test/test_merchant_paid_order_list.py
+test/test_merchant_wallet_api.py
 test/test_null_enum.py
 test/test_option.py
 test/test_order_create.py
@@ -104,6 +109,7 @@ test/test_order_create_response.py
 test/test_order_detail.py
 test/test_order_error.py
 test/test_order_item_create.py
+test/test_order_shipping_api.py
 test/test_order_status_enum.py
 test/test_order_user.py
 test/test_packing.py
@@ -112,6 +118,7 @@ test/test_paginated_order_detail_list.py
 test/test_payment_order.py
 test/test_refund_order.py
 test/test_revive_shipment.py
+test/test_seller_profile_management_api.py
 test/test_shipping_method.py
 test/test_shipping_type_enum.py
 test/test_type_name_enum.py

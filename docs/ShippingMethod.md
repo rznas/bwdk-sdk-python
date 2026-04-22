@@ -7,19 +7,19 @@ Serializer for shipping method details.
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **int** |  | [readonly] 
-**name** | **str** | نام روش/گزینه بسته‌بندی | 
-**description** | **str** | شناسه روش ارسال برای استفاده در سفارش | [optional] 
-**shipping_type** | [**ShippingTypeEnum**](ShippingTypeEnum.md) | شناسه وضعیت ارسال از دیجی اکسپرس  * &#x60;1&#x60; - سایر * &#x60;2&#x60; - دیجی اکسپرس | [optional] 
+**name** | **str** | نام روش ارسال | 
+**description** | **str** | توضیحات روش ارسال و جزئیات تحویل آن | [optional] 
+**shipping_type** | [**ShippingTypeEnum**](ShippingTypeEnum.md) | نوع روش ارسال: عادی یا دیجی اکسپرس  * &#x60;1&#x60; - سایر * &#x60;2&#x60; - دیجی اکسپرس | [optional] 
 **get_shipping_type_display** | **str** |  | [readonly] 
 **shipping_type_display** | **str** |  | [readonly] 
-**cost** | **int** | هزینه ارسال برای منطقه اصلی (مثلاً تهران) به تومان | [optional] 
+**cost** | **int** | هزینه ارسال برای منطقه اولیه (مثلاً تهران) به تومان | [optional] 
 **secondary_cost** | **int** | هزینه ارسال برای مناطق دیگر به تومان | [optional] 
-**minimum_time_sending** | **int** | حداقل تعداد روز از تاریخ سفارش تا تحویل | [optional] 
-**maximum_time_sending** | **int** | Maximum number of days from order date to delivery | [optional] 
+**minimum_time_sending** | **int** | حداقل تعداد روزها از تاریخ سفارش تا تحویل | [optional] 
+**maximum_time_sending** | **int** | حداکثر تعداد روزها از تاریخ سفارش تا تحویل | [optional] 
 **delivery_time_display** | **str** |  | [readonly] 
 **delivery_time_range_display** | [**DeliveryTimeRangeDisplay**](DeliveryTimeRangeDisplay.md) |  | [readonly] 
 **inventory_address** | [**BusinessAddress**](BusinessAddress.md) |  | [readonly] 
-**is_pay_at_destination** | **bool** | آیا روش ارسال پرداخت در مقصد است | [optional] 
+**is_pay_at_destination** | **bool** | Whether the shipping method is pay at destination | [optional] 
 
 ## Example
 

@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**is_authenticated** | **bool** | وضعیت لاگین بودن | 
+**is_authenticated** | **bool** | Authentication status | 
 
 ## Example
 

@@ -5,7 +5,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**preparation_time** | **int** | زمان آمادهسازی سفارش (به روز) | [optional] 
+**preparation_time** | **int** | The preparation time for the order in days. | [optional] 
 
 ## Example
 
