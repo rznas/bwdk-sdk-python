@@ -1,90 +1,104 @@
-# bwdk-sdk
-<div dir=\"rtl\" style=\"text-align: right;\">
+# BWDK Order State Flowchart
 
-# مستندات فروشندگان در سرویس خرید با دیجی‌کالا
+This document describes the full lifecycle of an order in the **BWDK (Buy With DigiKala)** platform.
+It is intended for merchants integrating with BWDK via any of the generated SDKs.
 
-این پلتفرم برای فروشندگان (مرچنت‌ها) جهت یکپارچه‌سازی خدمات پرداخت و تجارت الکترونیکی با سیستم خرید با دیجی‌کالا.
-شامل مدیریت سفارشات، ارسال، و احراز هویت فروشندگان است.
+---
 
+## 1. Pre-payment Flow
 
-
+The order starts in `INITIAL` and, through customer interaction, progresses toward payment.
+At any point before payment, it may also transition into a terminal failure/expiration state.
 
 ```mermaid
 flowchart TD
     START([شروع]) --> INITIAL
 
-    INITIAL[\"1️⃣ INITIAL\\nسفارش ایجاد شد\"]
-    STARTED[\"2️⃣ STARTED\\nمشتری به BWDK هدایت شد\"]
-    PENDING[\"3️⃣ PENDING\\nمشتری وارد شد و سفارش در انتظار پرداخت\"]
-    WAITING_FOR_GATEWAY[\"4️⃣ WAITING_FOR_GATEWAY\\nمشتری به درگاه پرداخت هدایت شد\"]
-    PAID_BY_USER[\"7️⃣ PAID_BY_USER\\nپرداخت موفق\"]
-    VERIFIED_BY_MERCHANT[\"9️⃣ VERIFIED_BY_MERCHANT\\nتأیید شده توسط فروشنده\"]
-    SHIPPED[\"🚚 SHIPPED\\nارسال شد\"]
-    DELIVERED[\"✅ DELIVERED\\nتحویل داده شد\"]
+    INITIAL["1️⃣ INITIAL\nسفارش ایجاد شد"]
+    STARTED["2️⃣ STARTED\nمشتری به BWDK هدایت شد"]
+    PENDING["3️⃣ PENDING\nمشتری وارد شد و سفارش در انتظار پرداخت"]
+    WAITING_FOR_GATEWAY["4️⃣ WAITING_FOR_GATEWAY\nمشتری به درگاه پرداخت هدایت شد"]
 
-    EXPIRED[\"⏰ EXPIRED\\nمنقضی شد\"]
-    EXPIRATION_TIME_EXCEEDED[\"⏱️ EXPIRATION_TIME_EXCEEDED\\nزمان انقضا گذشت\"]
-    CANCELLED[\"❌ CANCELLED\\nلغو توسط مشتری\"]
-    FAILED_TO_PAY[\"💳 FAILED_TO_PAY\\nپرداخت ناموفق\"]
-    FAILED_TO_VERIFY_BY_MERCHANT[\"🔴 FAILED_TO_VERIFY_BY_MERCHANT\\nتأیید مرچنت ناموفق\"]
-    FAILED_BY_MERCHANT[\"🔴 FAILED_BY_MERCHANT\\nخطا از سمت مرچنت\"]
-    CANCELLED_BY_MERCHANT[\"🔴 CANCELLED_BY_MERCHANT\\nلغو توسط مرچنت\"]
+    EXPIRED["⏰ EXPIRED\nمنقضی شد"]
+    EXPIRATION_TIME_EXCEEDED["⏱️ EXPIRATION_TIME_EXCEEDED\nزمان انقضا گذشت"]
+    CANCELLED["❌ CANCELLED\nلغو توسط مشتری"]
+    FAILED_TO_PAY["💳 FAILED_TO_PAY\nپرداخت ناموفق"]
 
-    R_CUSTOMER_REQUEST[\"1️⃣3️⃣ REQUEST_TO_REFUND\\nدرخواست استرداد توسط مشتری\"]
-    R_FAILED_VERIFY[\"1️⃣4️⃣ REQUEST_TO_REFUND\\nاسترداد پس از تأیید ناموفق مرچنت\"]
-    R_FAILED_MERCHANT[\"1️⃣5️⃣ REQUEST_TO_REFUND\\nاسترداد پس از خطای مرچنت\"]
-    R_CANCELLED_MERCHANT[\"1️⃣6️⃣ REQUEST_TO_REFUND\\nاسترداد پس از لغو مرچنت\"]
-    REFUND_COMPLETED[\"✅ REFUND_COMPLETED\\nاسترداد تکمیل شد\"]
+    INITIAL -->|"مرچنت سفارش ایجاد کرد"| STARTED
+    STARTED -->|"مشتری وارد سیستم شد"| PENDING
+    PENDING -->|"مشتری سفارش را نهایی و ثبت کرد"| WAITING_FOR_GATEWAY
 
-    INITIAL -->|\"مرچنت سفارش ایجاد کرد\"| STARTED
-    STARTED -->|\"مشتری وارد سیستم شد\"| PENDING
-    PENDING -->|\"مشتری سفارش را نهایی و ثبت کرد\"| WAITING_FOR_GATEWAY
-    WAITING_FOR_GATEWAY -->|\"پرداخت با موفقیت انجام شد\"| PAID_BY_USER
-    PAID_BY_USER -->|\"مرچنت سفارش را تأیید کرد\"| VERIFIED_BY_MERCHANT
-    VERIFIED_BY_MERCHANT -->|\"مرچنت وضعیت را به ارسال تغییر داد\"| SHIPPED
-    SHIPPED -->|\"مرچنت تحویل را تأیید کرد\"| DELIVERED
+    INITIAL -->|"زمان رزرو به پایان رسید"| EXPIRED
+    STARTED -->|"زمان رزرو به پایان رسید"| EXPIRED
+    PENDING -->|"زمان رزرو به پایان رسید"| EXPIRED
+    WAITING_FOR_GATEWAY -->|"زمان رزرو به پایان رسید"| EXPIRED
 
-    INITIAL -->|\"زمان رزرو به پایان رسید\"| EXPIRED
-    STARTED -->|\"زمان رزرو به پایان رسید\"| EXPIRED
-    PENDING -->|\"زمان رزرو به پایان رسید\"| EXPIRED
-    WAITING_FOR_GATEWAY -->|\"زمان رزرو به پایان رسید\"| EXPIRED
+    PENDING -->|"زمان مجاز سفارش سپری شده بود"| EXPIRATION_TIME_EXCEEDED
+    WAITING_FOR_GATEWAY -->|"زمان مجاز سفارش سپری شده بود"| EXPIRATION_TIME_EXCEEDED
 
-    PENDING -->|\"زمان مجاز سفارش سپری شده بود\"| EXPIRATION_TIME_EXCEEDED
-    WAITING_FOR_GATEWAY -->|\"زمان مجاز سفارش سپری شده بود\"| EXPIRATION_TIME_EXCEEDED
+    PENDING -->|"مشتری انصراف داد"| CANCELLED
+    WAITING_FOR_GATEWAY -->|"مشتری انصراف داد"| CANCELLED
 
-    PENDING -->|\"مشتری انصراف داد\"| CANCELLED
-    WAITING_FOR_GATEWAY -->|\"مشتری انصراف داد\"| CANCELLED
-
-    WAITING_FOR_GATEWAY -->|\"پرداخت ناموفق بود\"| FAILED_TO_PAY
-
-    PAID_BY_USER -->|\"مرچنت تأیید را رد کرد\"| FAILED_TO_VERIFY_BY_MERCHANT
-    PAID_BY_USER -->|\"مرچنت اعلام ناتوانی در انجام سفارش کرد\"| FAILED_BY_MERCHANT
-    PAID_BY_USER -->|\"مرچنت سفارش را لغو کرد\"| CANCELLED_BY_MERCHANT
-    VERIFIED_BY_MERCHANT -->|\"مرچنت سفارش را لغو کرد\"| CANCELLED_BY_MERCHANT
-
-    PAID_BY_USER -->|\"مرچنت درخواست استرداد داد\"| R_CUSTOMER_REQUEST
-    VERIFIED_BY_MERCHANT -->|\"مرچنت درخواست استرداد داد\"| R_CUSTOMER_REQUEST
-    FAILED_TO_VERIFY_BY_MERCHANT -->|\"سیستم استرداد را آغاز کرد\"| R_FAILED_VERIFY
-    FAILED_BY_MERCHANT -->|\"سیستم استرداد را آغاز کرد\"| R_FAILED_MERCHANT
-    CANCELLED_BY_MERCHANT -->|\"سیستم استرداد را آغاز کرد\"| R_CANCELLED_MERCHANT
-
-    R_CUSTOMER_REQUEST -->|\"استرداد توسط دیجی‌پی تأیید شد\"| REFUND_COMPLETED
-    R_FAILED_VERIFY -->|\"استرداد توسط دیجی‌پی تأیید شد\"| REFUND_COMPLETED
-    R_FAILED_MERCHANT -->|\"استرداد توسط دیجی‌پی تأیید شد\"| REFUND_COMPLETED
-    R_CANCELLED_MERCHANT -->|\"استرداد توسط دیجی‌پی تأیید شد\"| REFUND_COMPLETED
+    WAITING_FOR_GATEWAY -->|"پرداخت ناموفق بود"| FAILED_TO_PAY
 
     style INITIAL fill:#9e9e9e,color:#fff
     style STARTED fill:#1565c0,color:#fff
     style PENDING fill:#ef6c00,color:#fff
     style WAITING_FOR_GATEWAY fill:#6a1b9a,color:#fff
-    style PAID_BY_USER fill:#2e7d32,color:#fff
-    style VERIFIED_BY_MERCHANT fill:#1b5e20,color:#fff
-    style SHIPPED fill:#0277bd,color:#fff
-    style DELIVERED fill:#1b5e20,color:#fff
     style EXPIRED fill:#b71c1c,color:#fff
     style EXPIRATION_TIME_EXCEEDED fill:#b71c1c,color:#fff
     style CANCELLED fill:#7f0000,color:#fff
     style FAILED_TO_PAY fill:#b71c1c,color:#fff
+```
+
+---
+
+## 2. Post-payment Flow
+
+After a successful payment (`PAID_BY_USER`), the order moves through the merchant
+verification, fulfillment, and (optionally) refund pipeline.
+
+```mermaid
+flowchart TD
+    PAID_BY_USER["7️⃣ PAID_BY_USER\nپرداخت موفق"]
+    VERIFIED_BY_MERCHANT["9️⃣ VERIFIED_BY_MERCHANT\nتأیید شده توسط فروشنده"]
+    SHIPPED["🚚 SHIPPED\nارسال شد"]
+    DELIVERED["✅ DELIVERED\nتحویل داده شد"]
+
+    FAILED_TO_VERIFY_BY_MERCHANT["🔴 FAILED_TO_VERIFY_BY_MERCHANT\nتأیید مرچنت ناموفق"]
+    FAILED_BY_MERCHANT["🔴 FAILED_BY_MERCHANT\nخطا از سمت مرچنت"]
+    CANCELLED_BY_MERCHANT["🔴 CANCELLED_BY_MERCHANT\nلغو توسط مرچنت"]
+
+    R_CUSTOMER_REQUEST["13️⃣ REQUEST_TO_REFUND\nدرخواست استرداد توسط مشتری"]
+    R_FAILED_VERIFY["14️⃣ REQUEST_TO_REFUND\nاسترداد پس از تأیید ناموفق مرچنت"]
+    R_FAILED_MERCHANT["15️⃣ REQUEST_TO_REFUND\nاسترداد پس از خطای مرچنت"]
+    R_CANCELLED_MERCHANT["16️⃣ REQUEST_TO_REFUND\nاسترداد پس از لغو مرچنت"]
+    REFUND_COMPLETED["✅ REFUND_COMPLETED\nاسترداد تکمیل شد"]
+
+    PAID_BY_USER -->|"مرچنت سفارش را تأیید کرد"| VERIFIED_BY_MERCHANT
+    VERIFIED_BY_MERCHANT -->|"مرچنت وضعیت را به ارسال تغییر داد"| SHIPPED
+    SHIPPED -->|"مرچنت تحویل را تأیید کرد"| DELIVERED
+
+    PAID_BY_USER -->|"مرچنت تأیید را رد کرد"| FAILED_TO_VERIFY_BY_MERCHANT
+    PAID_BY_USER -->|"مرچنت اعلام ناتوانی در انجام سفارش کرد"| FAILED_BY_MERCHANT
+    PAID_BY_USER -->|"مرچنت سفارش را لغو کرد"| CANCELLED_BY_MERCHANT
+    VERIFIED_BY_MERCHANT -->|"مرچنت سفارش را لغو کرد"| CANCELLED_BY_MERCHANT
+
+    PAID_BY_USER -->|"مرچنت درخواست استرداد داد"| R_CUSTOMER_REQUEST
+    VERIFIED_BY_MERCHANT -->|"مرچنت درخواست استرداد داد"| R_CUSTOMER_REQUEST
+    FAILED_TO_VERIFY_BY_MERCHANT -->|"سیستم استرداد را آغاز کرد"| R_FAILED_VERIFY
+    FAILED_BY_MERCHANT -->|"سیستم استرداد را آغاز کرد"| R_FAILED_MERCHANT
+    CANCELLED_BY_MERCHANT -->|"سیستم استرداد را آغاز کرد"| R_CANCELLED_MERCHANT
+
+    R_CUSTOMER_REQUEST -->|"استرداد توسط دیجی‌پی تأیید شد"| REFUND_COMPLETED
+    R_FAILED_VERIFY -->|"استرداد توسط دیجی‌پی تأیید شد"| REFUND_COMPLETED
+    R_FAILED_MERCHANT -->|"استرداد توسط دیجی‌پی تأیید شد"| REFUND_COMPLETED
+    R_CANCELLED_MERCHANT -->|"استرداد توسط دیجی‌پی تأیید شد"| REFUND_COMPLETED
+
+    style PAID_BY_USER fill:#2e7d32,color:#fff
+    style VERIFIED_BY_MERCHANT fill:#1b5e20,color:#fff
+    style SHIPPED fill:#0277bd,color:#fff
+    style DELIVERED fill:#1b5e20,color:#fff
     style FAILED_TO_VERIFY_BY_MERCHANT fill:#b71c1c,color:#fff
     style FAILED_BY_MERCHANT fill:#b71c1c,color:#fff
     style CANCELLED_BY_MERCHANT fill:#7f0000,color:#fff
@@ -97,7 +111,7 @@ flowchart TD
 
 ---
 
-<div dir=\"rtl\" style=\"text-align: right;\">
+<div dir="rtl" style="text-align: right;">
 
 ## توضیح وضعیت‌های سفارش
 
@@ -282,166 +296,3 @@ flowchart TD
 **وابستگی‌ها:** یکی از وضعیت‌های درخواست استرداد (۱۳، ۱۴، ۱۵ یا ۱۶) باید فعال باشد و Digipay تراکنش استرداد را تأیید کرده باشد.
 
 </div>
-
-
-This Python package is automatically generated by the [OpenAPI Generator](https://openapi-generator.tech) project:
-
-- API version: 1.0.0
-- Package version: 1.0.1
-- Generator version: 7.21.0
-- Build package: org.openapitools.codegen.languages.PythonClientCodegen
-
-## Requirements.
-
-Python 3.9+
-
-## Installation & Usage
-### pip install
-
-If the python package is hosted on a repository, you can install directly using:
-
-```sh
-pip install git+https://github.com/GIT_USER_ID/GIT_REPO_ID.git
-```
-(you may need to run `pip` with root permission: `sudo pip install git+https://github.com/GIT_USER_ID/GIT_REPO_ID.git`)
-
-Then import the package:
-```python
-import bwdk_sdk
-```
-
-### Setuptools
-
-Install via [Setuptools](http://pypi.python.org/pypi/setuptools).
-
-```sh
-python setup.py install --user
-```
-(or `sudo python setup.py install` to install the package for all users)
-
-Then import the package:
-```python
-import bwdk_sdk
-```
-
-### Tests
-
-Execute `pytest` to run the tests.
-
-## Getting Started
-
-Please follow the [installation procedure](#installation--usage) and then run the following:
-
-```python
-
-import bwdk_sdk
-from bwdk_sdk.rest import ApiException
-from pprint import pprint
-
-# Defining the host is optional and defaults to https://bwdk-backend.digify.shop
-# See configuration.py for a list of all supported configuration parameters.
-configuration = bwdk_sdk.Configuration(
-    host = "https://bwdk-backend.digify.shop"
-)
-
-# The client must configure the authentication and authorization parameters
-# in accordance with the API server security policy.
-# Examples for each auth method are provided below, use the example that
-# satisfies your auth use case.
-
-# Configure API key authorization: MerchantAPIKeyAuth
-configuration.api_key['MerchantAPIKeyAuth'] = os.environ["API_KEY"]
-
-# Uncomment below to setup prefix (e.g. Bearer) for API key, if needed
-# configuration.api_key_prefix['MerchantAPIKeyAuth'] = 'Bearer'
-
-
-# Enter a context with an instance of the API client
-with bwdk_sdk.ApiClient(configuration) as api_client:
-    # Create an instance of the API class
-    api_instance = bwdk_sdk.Api(api_client)
-    order_create = bwdk_sdk.OrderCreate() # OrderCreate | 
-
-    try:
-        # ساخت سفارش
-        api_response = api_instance.order_api_v1_create_order_create(order_create)
-        print("The response of Api->order_api_v1_create_order_create:\n")
-        pprint(api_response)
-    except ApiException as e:
-        print("Exception when calling Api->order_api_v1_create_order_create: %s\n" % e)
-
-```
-
-## Documentation for API Endpoints
-
-All URIs are relative to *https://bwdk-backend.digify.shop*
-
-Class | Method | HTTP request | Description
------------- | ------------- | ------------- | -------------
-*Api* | [**order_api_v1_create_order_create**](docs/Api.md#order_api_v1_create_order_create) | **POST** /order/api/v1/create-order/ | ساخت سفارش
-*Api* | [**order_api_v1_manager_cancel_shipment_create**](docs/Api.md#order_api_v1_manager_cancel_shipment_create) | **POST** /order/api/v1/manager/{order_uuid}/cancel-shipment/ | لغو ارسال سفارش
-*Api* | [**order_api_v1_manager_change_shipping_method_update**](docs/Api.md#order_api_v1_manager_change_shipping_method_update) | **PUT** /order/api/v1/manager/{order_uuid}/change-shipping-method/ | تغییر روش ارسال
-*Api* | [**order_api_v1_manager_list**](docs/Api.md#order_api_v1_manager_list) | **GET** /order/api/v1/manager/ | لیست سفارشات
-*Api* | [**order_api_v1_manager_paid_list**](docs/Api.md#order_api_v1_manager_paid_list) | **GET** /order/api/v1/manager/paid/ | سفارش پرداخت‌شده و تایید‌نشده
-*Api* | [**order_api_v1_manager_refund_create**](docs/Api.md#order_api_v1_manager_refund_create) | **POST** /order/api/v1/manager/{order_uuid}/refund/ | بازگشت سفارش
-*Api* | [**order_api_v1_manager_retrieve**](docs/Api.md#order_api_v1_manager_retrieve) | **GET** /order/api/v1/manager/{order_uuid}/ | دریافت سفارش
-*Api* | [**order_api_v1_manager_revive_shipment_create**](docs/Api.md#order_api_v1_manager_revive_shipment_create) | **POST** /order/api/v1/manager/{order_uuid}/revive-shipment/ | احیای ارسال سفارش
-*Api* | [**order_api_v1_manager_update_status_update**](docs/Api.md#order_api_v1_manager_update_status_update) | **PUT** /order/api/v1/manager/{order_uuid}/update-status/ | به‌روزرسانی وضعیت سفارش
-*Api* | [**order_api_v1_manager_verify_create**](docs/Api.md#order_api_v1_manager_verify_create) | **POST** /order/api/v1/manager/{order_uuid}/verify/ | تایید سفارش
-*Api* | [**merchant_api_v1_auth_status_retrieve**](docs/Api.md#merchant_api_v1_auth_status_retrieve) | **GET** /merchant/api/v1/auth/status/ | وضعیت لاگین بودن
-*Api* | [**wallets_api_v1_wallet_balance_retrieve**](docs/Api.md#wallets_api_v1_wallet_balance_retrieve) | **GET** /wallets/api/v1/wallet-balance/ | دریافت موجودی کیف پول
-
-
-## Documentation For Models
-
- - [AuthStatusResponse](docs/AuthStatusResponse.md)
- - [BusinessAddress](docs/BusinessAddress.md)
- - [DeliveryTimeRangeDisplay](docs/DeliveryTimeRangeDisplay.md)
- - [ErrorEnum](docs/ErrorEnum.md)
- - [GatewayTypeEnum](docs/GatewayTypeEnum.md)
- - [Merchant](docs/Merchant.md)
- - [MerchantOrderCancelShipmentResponse](docs/MerchantOrderCancelShipmentResponse.md)
- - [MerchantOrderRefundResponse](docs/MerchantOrderRefundResponse.md)
- - [MerchantOrderReviveShipmentResponse](docs/MerchantOrderReviveShipmentResponse.md)
- - [MerchantPaidOrderList](docs/MerchantPaidOrderList.md)
- - [NullEnum](docs/NullEnum.md)
- - [Option](docs/Option.md)
- - [OrderCreate](docs/OrderCreate.md)
- - [OrderCreateResponse](docs/OrderCreateResponse.md)
- - [OrderDetail](docs/OrderDetail.md)
- - [OrderError](docs/OrderError.md)
- - [OrderItemCreate](docs/OrderItemCreate.md)
- - [OrderStatusEnum](docs/OrderStatusEnum.md)
- - [OrderUser](docs/OrderUser.md)
- - [Packing](docs/Packing.md)
- - [PaginatedMerchantPaidOrderListList](docs/PaginatedMerchantPaidOrderListList.md)
- - [PaginatedOrderDetailList](docs/PaginatedOrderDetailList.md)
- - [PaymentOrder](docs/PaymentOrder.md)
- - [RefundOrder](docs/RefundOrder.md)
- - [ReviveShipment](docs/ReviveShipment.md)
- - [ShippingMethod](docs/ShippingMethod.md)
- - [ShippingTypeEnum](docs/ShippingTypeEnum.md)
- - [TypeNameEnum](docs/TypeNameEnum.md)
- - [UpdateOrderStatus](docs/UpdateOrderStatus.md)
- - [VerifyOrder](docs/VerifyOrder.md)
- - [WalletBalance](docs/WalletBalance.md)
-
-
-<a id="documentation-for-authorization"></a>
-## Documentation For Authorization
-
-
-Authentication schemes defined for the API:
-<a id="MerchantAPIKeyAuth"></a>
-### MerchantAPIKeyAuth
-
-- **Type**: API key
-- **API key parameter name**: Authorization
-- **Location**: HTTP header
-
-
-## Author
-
-
-
-
