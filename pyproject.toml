@@ -1,6 +1,6 @@
 [project]
 name = "bwdk_sdk"
-version = "1.0.3"
+version = "1.0.4"
 description = "BWDK API"
 authors = [
   {name = "OpenAPI Generator Community",email = "team@openapitools.org"},
